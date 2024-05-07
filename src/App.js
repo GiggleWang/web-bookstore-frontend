@@ -1,10 +1,13 @@
 import React from 'react';
 import BasicLayout from "./components/BasicLayout";
+import {AuthProvider} from "./service/AuthContext";
 
 const App = () => {
 
     return (
-        <BasicLayout/>
+        <AuthProvider>
+            <BasicLayout/>
+        </AuthProvider>
     );
 
 };

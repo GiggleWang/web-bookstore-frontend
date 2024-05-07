@@ -1,17 +1,19 @@
 import {getJson} from "./common";
+import axios from 'axios';
+import api from "./axios";
+
 export async function getOrders() {
     const url = `${process.env.REACT_APP_API_URL}/api/order/user/1`;
-    console.log(`Full API URL: ${process.env.REACT_APP_API_URL}/api/order/user/1`);
+    console.log(`Full API URL: ${url}`);
 
-    let orders;
     try {
-        orders = await getJson(url);
-        console.log("Orders received:", orders);
-    } catch (e) {
-        console.log(e);
-        orders = []
+        const response = await api.get(url);
+        console.log("Orders received:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        return [];
     }
-    return orders;
 }
 
 export function getTime(time) {

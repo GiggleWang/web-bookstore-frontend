@@ -1,12 +1,13 @@
-import React, {useEffect, useState} from "react";
+import React, { useState} from "react";
 import { Pagination ,Row,Col} from "antd";
 import BookCard from "./BookCard";
-import {booksData} from "../service/data";
+import useBooks from "../service/books";
 export default function BooksExhibition() {
-    const booksDatabase=booksData;
+    const { books: booksDatabase, loading, error } = useBooks();  // 正确提取 books 数组
     const pageSize = 12; // 6列*2行，每页展示12本书
     const [currentPage, setCurrentPage] = useState(1);
 
+    console.log(booksDatabase);
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     const displayedBooks = booksDatabase.slice(startIndex, endIndex);
