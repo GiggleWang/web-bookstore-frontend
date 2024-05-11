@@ -13,3 +13,22 @@ export async function getCartItems() {
         return [];
     }
 }
+
+export async function onAddCartItem(id, quantity) {
+    try {
+        const response = await api.post(`${process.env.REACT_APP_API_URL}/api/cart`, {
+            bookId: id, // 使用传递给函数的id
+            quantity: quantity || 1, // 使用传递给函数的quantity，如果没有提供，默认为1
+        });
+
+        if (response.status === 200) {
+            console.log('Book added to cart:', response.data);
+            // 在这里添加逻辑，比如更新购物车视图或提示用户
+        } else {
+            throw new Error('Failed to add book to cart');
+        }
+    } catch (error) {
+        console.error('Error adding book to cart:', error);
+        // 在这里添加错误处理逻辑，比如提示用户添加失败
+    }
+}

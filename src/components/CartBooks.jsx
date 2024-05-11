@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Table } from "antd";
 import { Link } from "react-router-dom";
 import { getCartItems } from "../service/cart";
-
 const CartBooks = () => {
     const [cartData, setCartData] = useState([]);
 

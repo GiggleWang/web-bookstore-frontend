@@ -1,16 +1,14 @@
 import React, {useState} from 'react';
 import CartBooks from "../components/CartBooks";
-import {Input, Statistic, Row, Button} from 'antd';
+import {Input, Statistic, Row, Button, message} from 'antd';
 import {cartBookData} from "../service/data";
+import api from "../service/axios";
+import { useNavigate } from 'react-router-dom';
 
 const {Search} = Input;
 
 const onSearch = (value, _e, info) => {
     console.log(info?.source, value);
-};
-const handleClearCart = () => {
-    console.log('清空购物车');
-    // 清空购物车的具体逻辑
 };
 
 const handlePlaceOrder = () => {
@@ -44,6 +42,30 @@ const handlePlaceOrder = () => {
 };
 
 const ShoppingCartPage = () => {
+    const navigate = useNavigate();
+    const handleClearCart = () => {
+
+        console.log('清空购物车');
+        const url = `${process.env.REACT_APP_API_URL}/api/cart/clean`; // 后端提供的清空购物车的API路径
+
+        api.post(url)
+            .then(response => {
+                console.log(response);
+                if (response.status===200) {
+                    message.success('购物车删除成功');
+                    navigate('/home'); // 导航到 '/home' 路由
+                    setTimeout(() => {
+                        navigate(-1); // 使用浏览器的后退功能回到上一个页面
+                    }, 0); // 延迟执行，以确保先完成页面跳转
+                } else {
+                    message.error('购物车删除失败');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                message.error('购物车删除失败');
+            });
+    };
     const [totalPrice, setTotalPrice] = useState(0);
 
     const handleBookSelection = (selectedBooks) => {

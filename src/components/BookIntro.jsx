@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getBookById } from "../service/books";
 import { Row, Col, Image, Typography, Divider, Space, Button } from 'antd';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
-
+import {onAddCartItem} from "../service/cart";
 const { Title, Paragraph } = Typography;
 
 export default function BookIntro(props) {
@@ -23,9 +22,6 @@ export default function BookIntro(props) {
         });
     }, [bookId]);
 
-    function onAddCartItem(){
-        console.log("add cart");
-    }
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: Could not fetch the book</p>;
@@ -67,7 +63,7 @@ export default function BookIntro(props) {
                             </div>
                         </div>
                         <Space>
-                            <Button size="large" onClick={onAddCartItem}>加入购物车</Button>
+                            <Button size="large" onClick={() => onAddCartItem(currentBook.id, 1)}>加入购物车</Button>
                             <Button type="primary" size="large">立即购买</Button>
                         </Space>
                     </Space>
