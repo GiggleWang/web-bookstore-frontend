@@ -1,64 +1,57 @@
-import {cartBookData} from "../service/data";
-import React, {useState} from 'react';
-import {Table, InputNumber} from 'antd';
-import {Button} from "antd";
-import {Link} from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { Table } from "antd";
+import { Link } from "react-router-dom";
+import { getCartItems } from "../service/cart";
 
-const columns = [
-    {
-        title: '书名', dataIndex: 'book', key: 'book_title',
-        render: book => (<Link to={`/book/${book.id}`}>{book.title}</Link>),
-    },
-    {
-        title: '数量', dataIndex: 'number', key: 'number',
-        render: (number, item) => <InputNumber min={1} defaultValue={number} value={item.value}
-                                               onChange={(newNumber) => {
-                                                   console.log('change number')
-                                               }}/>
-    },
-    {
-        title: '价格', dataIndex: 'book', key: 'book_price',
-        render: book => book.price / 100
-    },
-    {
-        title: '操作',
-        dataIndex: '',
-        key: 'action',
-        render: (item) => <Button type="primary" onClick={() => {
-            console.log('删除图书')
-        }}>删除</Button>,
-    },
-];
-const data = cartBookData;
+const CartBooks = () => {
+    const [cartData, setCartData] = useState([]);
 
-const CartBooks = (props) => {
+    useEffect(() => {
+        const fetchCartData = async () => {
+            const items = await getCartItems();
+            setCartData(items.map(item => ({
+                ...item,
+                key: item.id,
+                number: item.quantity,  // 映射quantity为number用于表格显示
+                book: {
+                    ...item.book,
+                    title: item.book.name,  // 将name映射为title以符合列定义
+                    price: item.price  // 使用外层的总价格
+                }
+            })));
+        };
+        fetchCartData();
+    }, []);
 
-// rowSelection object indicates the need for row selection
-    const rowSelection = {
-        onChange: (selectedRowKeys, selectedRows) => {
-            console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-            // 调用传入的回调函数，以选中行的数据为参数
-            if (props.onBookSelection) {
-                props.onBookSelection(selectedRows);
-            }
+    const columns = [
+        {
+            title: '书名',
+            dataIndex: 'book',
+            key: 'book_title',
+            render: book => <Link to={`/book/${book.id}`}>{book.title}</Link>
         },
-        getCheckboxProps: (record) => ({
-            disabled: record.name === 'Disabled User',
-            // Column configuration not to be checked
-            name: record.name,
-        }),
-    };
+        {
+            title: '数量',
+            dataIndex: 'number',
+            key: 'number',
+            render: number => <span>{number}</span>
+        },
+        {
+            title: '价格',
+            dataIndex: 'book',
+            key: 'book_price',
+            render: book => `${(book.price / 100).toFixed(2)} 元`
+        },
+    ];
+
     return (
         <div>
             <Table
-                rowSelection={{
-                    type: 'checkbox',
-                    ...rowSelection,
-                }}
                 columns={columns}
-                dataSource={data}
+                dataSource={cartData}
             />
         </div>
     );
 };
+
 export default CartBooks;

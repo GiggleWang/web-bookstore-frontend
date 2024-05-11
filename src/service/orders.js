@@ -1,9 +1,8 @@
-import {getJson} from "./common";
-import axios from 'axios';
+
 import api from "./axios";
 
 export async function getOrders() {
-    const url = `${process.env.REACT_APP_API_URL}/api/order/user/1`;
+    const url = `${process.env.REACT_APP_API_URL}/api/order`;
     console.log(`Full API URL: ${url}`);
 
     try {
