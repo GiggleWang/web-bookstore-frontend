@@ -1,15 +1,6 @@
 import {booksData} from "./data";
 import {useEffect, useState} from "react";
 import api from "./axios";
-// export function getBookById(bookId) {
-//     for (let i = 0; i < booksData.length; i++) {
-//         if (booksData[i].id === bookId) {
-//             return booksData[i];
-//         }
-//     }
-//     return undefined; // 如果没有找到，返回undefined
-// }
-
 // 异步获取书籍数据
 export async function getBookById(bookId) {
     try {

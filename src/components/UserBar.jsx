@@ -11,6 +11,8 @@ const UserBar = () => {
     const onClick = useCallback(({ key }) => {
         if (key === '3') {
             localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('isAdmin')
+
             navigate('/');
         } else {
             message.info(`Click on item ${key}`);
