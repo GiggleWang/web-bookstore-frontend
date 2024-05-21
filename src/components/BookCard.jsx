@@ -8,7 +8,7 @@ export default function BookCard({ book }) {
         <Link to={`/book/${book.id}`}>
             <Card
                 hoverable
-                cover={<img alt={book.title} src={book.cover} />}
+                cover={<img alt={book.title} src={book.cover}/>}
             >
                 <Meta title={book.title} description={`￥${book.price / 100}`} />
             </Card>
