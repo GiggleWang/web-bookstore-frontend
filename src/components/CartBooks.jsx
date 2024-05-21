@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Table } from "antd";
 import { Link } from "react-router-dom";
 import { getCartItems } from "../service/cart";
-const CartBooks = () => {
+
+const CartBooks = ({ onSelectedItemsChange }) => {
     const [cartData, setCartData] = useState([]);
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
     useEffect(() => {
         const fetchCartData = async () => {
@@ -11,16 +13,27 @@ const CartBooks = () => {
             setCartData(items.map(item => ({
                 ...item,
                 key: item.id,
-                number: item.quantity,  // 映射quantity为number用于表格显示
+                number: item.quantity,
                 book: {
                     ...item.book,
-                    title: item.book.name,  // 将name映射为title以符合列定义
-                    price: item.price  // 使用外层的总价格
+                    title: item.book.name,
+                    price: item.price
                 }
             })));
         };
         fetchCartData();
     }, []);
+
+    const handleSelectChange = (selectedRowKeys) => {
+        setSelectedRowKeys(selectedRowKeys);
+        const selectedItems = cartData.filter(item => selectedRowKeys.includes(item.key));
+        onSelectedItemsChange(selectedItems);
+    };
+
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: handleSelectChange,
+    };
 
     const columns = [
         {
@@ -46,6 +59,7 @@ const CartBooks = () => {
     return (
         <div>
             <Table
+                rowSelection={rowSelection}
                 columns={columns}
                 dataSource={cartData}
             />

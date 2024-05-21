@@ -5,7 +5,10 @@ function OrdersTable({ orderList }) {
     const tableColumns = [
         { title: '收件人', dataIndex: 'receiver', key: 'receiver' },
         { title: '地址', dataIndex: 'shippingAddress', key: 'shippingAddress' },
-        { title: '总金额', dataIndex: 'totalPrice', key: 'totalPrice' },
+        {
+            title: '总金额', dataIndex: 'totalPrice', key: 'totalPrice',
+            render: (value) => `¥${(value / 100).toFixed(2)}`
+        },
         {
             title: '订单时间', dataIndex: 'orderDate', key: 'orderDate',
             render: (timestamp) => getTime(timestamp)

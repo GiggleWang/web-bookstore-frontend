@@ -1,4 +1,5 @@
 import api from "./axios";
+import {message} from "antd";
 
 export async function getCartItems() {
     const url = `${process.env.REACT_APP_API_URL}/api/cart`;
@@ -24,6 +25,7 @@ export async function onAddCartItem(id, quantity) {
         if (response.status === 200) {
             console.log('Book added to cart:', response.data);
             // 在这里添加逻辑，比如更新购物车视图或提示用户
+            message.success('加入购物车成功');
         } else {
             throw new Error('Failed to add book to cart');
         }
@@ -32,3 +34,5 @@ export async function onAddCartItem(id, quantity) {
         // 在这里添加错误处理逻辑，比如提示用户添加失败
     }
 }
+
+
