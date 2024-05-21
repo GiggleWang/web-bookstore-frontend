@@ -15,7 +15,7 @@ const HomePage = () => {
     return (
         isAdmin ? (
             <div>
-                {/*<AdminBooks/>*/}
+                <AdminBooks/>
             </div>
         ) : (
             <div>

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Table, Button, Modal, Form, Input, InputNumber } from 'antd';
 import axios from 'axios';
 import api from '../service/axios';
 
-// 获取所有书籍的API调用
 const fetchBooks = async () => {
     try {
-        const response = await api.get(`${process.env.REACT_APP_API_URL}/api/books`);
+        const response = await api.get(`${process.env.REACT_APP_API_URL}/api/admin/books`);
         return response.data;
     } catch (error) {
         console.error('Error fetching books:', error);
@@ -13,30 +13,27 @@ const fetchBooks = async () => {
     }
 };
 
-// 更新书籍的API调用
 const updateBook = async (bookId, updatedBook) => {
     try {
-        await axios.put(`${process.env.REACT_APP_API_URL}/api/admin/books/${bookId}`, updatedBook);
+        await api.put(`${process.env.REACT_APP_API_URL}/api/admin/books/${bookId}`, updatedBook);
     } catch (error) {
         console.error('Error updating book:', error);
         throw error;
     }
 };
 
-// 删除书籍的API调用
 const deleteBook = async (bookId) => {
     try {
-        await axios.delete(`${process.env.REACT_APP_API_URL}/api/admin/books/${bookId}`);
+        await api.delete(`${process.env.REACT_APP_API_URL}/api/admin/books/${bookId}`);
     } catch (error) {
         console.error('Error deleting book:', error);
         throw error;
     }
 };
 
-// 添加新书籍的API调用
 const addBook = async (newBook) => {
     try {
-        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/admin/books`, newBook);
+        const response = await api.post(`${process.env.REACT_APP_API_URL}/api/admin/books`, newBook);
         return response.data;
     } catch (error) {
         console.error('Error adding book:', error);
@@ -46,35 +43,60 @@ const addBook = async (newBook) => {
 
 const AdminBooks = () => {
     const [books, setBooks] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [loading, setLoading] = useState(true);
     const [editingBook, setEditingBook] = useState(null);
-    const [newBook, setNewBook] = useState({
-        title: '',
-        author: '',
-        cover: '',
-        isbn: '',
-        stock: 0
-    });
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+
+    const [form] = Form.useForm();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const data = await fetchBooks();
                 setBooks(data);
+                setLoading(false);
             } catch (error) {
                 console.error(error);
+                setLoading(false);
             }
         };
 
         fetchData();
     }, []);
 
-    const handleSearch = (e) => {
-        setSearchTerm(e.target.value);
+    const showEditModal = (book) => {
+        setEditingBook(book);
+        form.setFieldsValue(book);
+        setIsModalVisible(true);
     };
 
-    const handleEdit = (book) => {
-        setEditingBook(book);
+    const showAddModal = () => {
+        form.resetFields();
+        setIsAddModalVisible(true);
+    };
+
+    const handleEditOk = async () => {
+        try {
+            const updatedBook = await form.validateFields();
+            await updateBook(editingBook.id, updatedBook);
+            setBooks(books.map(book => (book.id === editingBook.id ? { ...book, ...updatedBook } : book)));
+            setIsModalVisible(false);
+            setEditingBook(null);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleAddOk = async () => {
+        try {
+            const newBook = await form.validateFields();
+            const addedBook = await addBook(newBook);
+            setBooks([...books, addedBook]);
+            setIsAddModalVisible(false);
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const handleDelete = async (bookId) => {
@@ -86,120 +108,133 @@ const AdminBooks = () => {
         }
     };
 
-    const handleSave = async () => {
-        try {
-            await updateBook(editingBook.id, editingBook);
-            setBooks(books.map(book => (book.id === editingBook.id ? editingBook : book)));
-            setEditingBook(null);
-        } catch (error) {
-            console.error(error);
-        }
+    const handleCancel = () => {
+        setIsModalVisible(false);
+        setIsAddModalVisible(false);
+        setEditingBook(null);
     };
 
-    const handleAdd = async () => {
-        try {
-            const addedBook = await addBook(newBook);
-            setBooks([...books, addedBook]);
-            setNewBook({ title: '', author: '', cover: '', isbn: '', stock: 0 });
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const filteredBooks = books.filter(book =>
-        book.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const columns = [
+        {
+            title: 'ID',
+            dataIndex: 'id',
+            key: 'id',
+        },
+        {
+            title: '书名',
+            dataIndex: 'name',
+            key: 'name',
+        },
+        {
+            title: '作者',
+            dataIndex: 'author',
+            key: 'author',
+        },
+        {
+            title: '价格',
+            dataIndex: 'price',
+            key: 'price',
+        },
+        {
+            title: '描述',
+            dataIndex: 'description',
+            key: 'description',
+        },
+        {
+            title: '封面',
+            dataIndex: 'cover',
+            key: 'cover',
+            render: (text) => <img src={text} alt="cover" width="50" />,
+        },
+        {
+            title: 'ISBN 编号',
+            dataIndex: 'isbn',
+            key: 'isbn',
+        },
+        {
+            title: '库存量',
+            dataIndex: 'leftNum',
+            key: 'leftNum',
+        },
+        {
+            title: '操作',
+            key: 'action',
+            render: (text, record) => (
+                <span>
+                    <Button onClick={() => showEditModal(record)}>修改</Button>
+                    <Button onClick={() => handleDelete(record.id)} style={{ marginLeft: 8 }}>删除</Button>
+                </span>
+            ),
+        },
+    ];
 
     return (
         <div>
-            <h1>管理图书</h1>
-            <input
-                type="text"
-                placeholder="搜索书名"
-                value={searchTerm}
-                onChange={handleSearch}
-            />
-            <div>
-                <h2>添加新书籍</h2>
-                <input
-                    type="text"
-                    placeholder="书名"
-                    value={newBook.title}
-                    onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
-                />
-                <input
-                    type="text"
-                    placeholder="作者"
-                    value={newBook.author}
-                    onChange={(e) => setNewBook({ ...newBook, author: e.target.value })}
-                />
-                <input
-                    type="text"
-                    placeholder="封面URL"
-                    value={newBook.cover}
-                    onChange={(e) => setNewBook({ ...newBook, cover: e.target.value })}
-                />
-                <input
-                    type="text"
-                    placeholder="ISBN编号"
-                    value={newBook.isbn}
-                    onChange={(e) => setNewBook({ ...newBook, isbn: e.target.value })}
-                />
-                <input
-                    type="number"
-                    placeholder="库存量"
-                    value={newBook.stock}
-                    onChange={(e) => setNewBook({ ...newBook, stock: parseInt(e.target.value) })}
-                />
-                <button onClick={handleAdd}>添加</button>
-            </div>
-            <ul>
-                {filteredBooks.map(book => (
-                    <li key={book.id}>
-                        {editingBook && editingBook.id === book.id ? (
-                            <div>
-                                <input
-                                    type="text"
-                                    value={editingBook.title}
-                                    onChange={(e) => setEditingBook({ ...editingBook, title: e.target.value })}
-                                />
-                                <input
-                                    type="text"
-                                    value={editingBook.author}
-                                    onChange={(e) => setEditingBook({ ...editingBook, author: e.target.value })}
-                                />
-                                <input
-                                    type="text"
-                                    value={editingBook.cover}
-                                    onChange={(e) => setEditingBook({ ...editingBook, cover: e.target.value })}
-                                />
-                                <input
-                                    type="text"
-                                    value={editingBook.isbn}
-                                    onChange={(e) => setEditingBook({ ...editingBook, isbn: e.target.value })}
-                                />
-                                <input
-                                    type="number"
-                                    value={editingBook.stock}
-                                    onChange={(e) => setEditingBook({ ...editingBook, stock: parseInt(e.target.value) })}
-                                />
-                                <button onClick={handleSave}>保存</button>
-                                <button onClick={() => setEditingBook(null)}>取消</button>
-                            </div>
-                        ) : (
-                            <div>
-                                <span>{book.title}</span>
-                                <span>{book.author}</span>
-                                <span><img src={book.cover} alt={book.title} width="50" /></span>
-                                <span>{book.isbn}</span>
-                                <span>{book.stock}</span>
-                                <button onClick={() => handleEdit(book)}>编辑</button>
-                                <button onClick={() => handleDelete(book.id)}>删除</button>
-                            </div>
-                        )}
-                    </li>
-                ))}
-            </ul>
+            <Table columns={columns} dataSource={books} rowKey="id" loading={loading} />
+            <Button type="primary" onClick={showAddModal} style={{ marginTop: 16 }}>添加新书籍</Button>
+            <Modal
+                title="修改书籍"
+                visible={isModalVisible}
+                onOk={handleEditOk}
+                onCancel={handleCancel}
+            >
+                <Form form={form} layout="vertical">
+                    <Form.Item name="id" label="ID">
+                        <Input disabled />
+                    </Form.Item>
+                    <Form.Item name="name" label="书名" rules={[{ required: true, message: '请输入书名' }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name="author" label="作者" rules={[{ required: true, message: '请输入作者' }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name="price" label="价格" rules={[{ required: true, message: '请输入价格' }]}>
+                        <InputNumber min={0} />
+                    </Form.Item>
+                    <Form.Item name="description" label="描述" rules={[{ required: true, message: '请输入描述' }]}>
+                        <Input.TextArea />
+                    </Form.Item>
+                    <Form.Item name="cover" label="封面URL" rules={[{ required: true, message: '请输入封面URL' }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name="isbn" label="ISBN 编号" rules={[{ required: true, message: '请输入ISBN编号' }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name="leftNum" label="库存量" rules={[{ required: true, message: '请输入库存量' }]}>
+                        <InputNumber min={0} />
+                    </Form.Item>
+                </Form>
+            </Modal>
+            <Modal
+                title="添加新书籍"
+                visible={isAddModalVisible}
+                onOk={handleAddOk}
+                onCancel={handleCancel}
+            >
+                <Form form={form} layout="vertical">
+                    <Form.Item name="name" label="书名" rules={[{ required: true, message: '请输入书名' }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name="author" label="作者" rules={[{ required: true, message: '请输入作者' }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name="price" label="价格" rules={[{ required: true, message: '请输入价格' }]}>
+                        <InputNumber min={0} />
+                    </Form.Item>
+                    <Form.Item name="description" label="描述" rules={[{ required: true, message: '请输入描述' }]}>
+                        <Input.TextArea />
+                    </Form.Item>
+                    <Form.Item name="cover" label="封面URL" rules={[{ required: true, message: '请输入封面URL' }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name="isbn" label="ISBN 编号" rules={[{ required: true, message: '请输入ISBN编号' }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name="leftNum" label="库存量" rules={[{ required: true, message: '请输入库存量' }]}>
+                        <InputNumber min={0} />
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     );
 };
