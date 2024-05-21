@@ -18,13 +18,27 @@ function LoginPage() {
         setLoading(true);
         try {
             const url = `${process.env.REACT_APP_API_URL}/api/login`;
-            console.log(url);
+            console.log(`Login URL: ${url}`);
             const response = await axios.post(url, {
                 email: username,
                 password: password,
                 type: type
             });
-            const { token } = response.data.data;
+
+            // 打印完整的响应对象
+            console.log("Full response:", JSON.stringify(response));
+
+            // 打印响应的具体部分
+            console.log("Response data:", response.data);
+            console.log("Response status:", response.status);
+
+            const { data } = response;
+
+            if (data.code !== 200) {
+                throw new Error(data.msg || '登录失败，请重试');
+            }
+
+            const { token } = data.data;
             localStorage.setItem('authToken', token);
             localStorage.setItem('isLoggedIn', 'true');
             if (type === 1) {
@@ -32,19 +46,33 @@ function LoginPage() {
             } else {
                 localStorage.setItem('isAdmin', 'false');
             }
-            console.log("admin in log", localStorage.getItem('isAdmin'));
-            console.log(token);
+            console.log("Admin in local storage:", localStorage.getItem('isAdmin'));
+            console.log("Token:", token);
+
             // 确保 localStorage 设置完成后再导航
             navigate('/home');
         } catch (error) {
-            notification.error({
-                message: '登录失败',
-                placement: 'topRight',
-            });
+            if (error.response && error.response.data) {
+                console.log('Error response:', JSON.stringify(error.response.data));
+                const errorMsg = error.response.data.msg || '登录失败，请重试';
+                notification.error({
+                    message: '登录失败',
+                    description: errorMsg,
+                    placement: 'topRight',
+                });
+            } else {
+                console.log('Error:', error.message);
+                notification.error({
+                    message: '登录失败',
+                    description: error.message,
+                    placement: 'topRight',
+                });
+            }
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="box" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>

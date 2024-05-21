@@ -1,11 +1,13 @@
 import React, {useState} from 'react';
 import {Descriptions, Button, Modal, Form, Input} from 'antd';
-import {userInfo, updateUserInfo} from "../service/data"; // 假设userInfo是初始用户信息
+import {userInfo, updateUserInfo} from "../service/data";
+import AdminBooks from "../components/AdminBooks";
+import MemberPage from "./MemberPage"; // 假设userInfo是初始用户信息
 
 const UserPage = () => {
     const [user, setUser] = useState(userInfo[0]); // 假设userInfo是一个数组，我们取第一个用户
     const [isEditing, setIsEditing] = useState(false);
-
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
     const handleEdit = () => {
         setIsEditing(true);
     };
@@ -23,6 +25,11 @@ const UserPage = () => {
     };
 
     return (
+        isAdmin ? (
+                <div>
+                    <MemberPage/>
+                </div>
+            ) :(
         <>
             <Descriptions
                 title="个人信息"
@@ -79,6 +86,7 @@ const UserPage = () => {
                 </Form>
             </Modal>
         </>
+        )
     );
 };
 

@@ -13,6 +13,7 @@ const App = () => {
 };
 window.addEventListener('beforeunload', function () {
     localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('isAdmin')
 });
 
 
