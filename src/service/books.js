@@ -16,8 +16,7 @@ export async function getBookById(bookId) {
     }
 }
 
-
-const useBooks = () => {
+const useBooks = (searchQuery = '') => {
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -25,9 +24,9 @@ const useBooks = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // 这里我们使用axios直接进行调用，假设你已经配置好了axios实例
+                const params = searchQuery ? { params: { name: searchQuery } } : {};
                 const url = `${process.env.REACT_APP_API_URL}/api/books`;
-                const { data } = await api.get(url);
+                const { data } = await api.get(url, params);
                 setBooks(data);
                 setLoading(false);
             } catch (error) {
@@ -38,9 +37,9 @@ const useBooks = () => {
         };
 
         fetchData();
-    }, []);
+    }, [searchQuery]);
 
     return { books, loading, error };
-}
+};
 
 export default useBooks;

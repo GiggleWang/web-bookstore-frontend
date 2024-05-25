@@ -2,7 +2,15 @@
 import api from "./axios";
 
 export async function getOrders() {
-    const url = `${process.env.REACT_APP_API_URL}/api/order`;
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+
+    let url;
+    if (isAdmin) {
+        url = `${process.env.REACT_APP_API_URL}/api/admin/order`;
+    } else {
+        url = `${process.env.REACT_APP_API_URL}/api/order`;
+    }
+
     console.log(`Full API URL: ${url}`);
 
     try {

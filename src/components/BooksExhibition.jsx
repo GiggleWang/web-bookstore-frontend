@@ -1,19 +1,33 @@
-import React, { useState} from "react";
-import { Pagination ,Row,Col} from "antd";
+import React, { useState } from "react";
+import { Input, Row, Col, Pagination } from "antd";
 import BookCard from "./BookCard";
 import useBooks from "../service/books";
+
 export default function BooksExhibition() {
-    const { books: booksDatabase, loading, error } = useBooks();  // 正确提取 books 数组
-    const pageSize = 12; // 6列*2行，每页展示12本书
+    const [searchQuery, setSearchQuery] = useState('');
+    const { books: booksDatabase, loading, error } = useBooks(searchQuery);
+    const pageSize = 12;
     const [currentPage, setCurrentPage] = useState(1);
 
-    console.log(booksDatabase);
+    const handleSearchChange = (value) => {
+        setSearchQuery(value);
+        setCurrentPage(1); // 重置到第一页
+    };
+
+
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     const displayedBooks = booksDatabase.slice(startIndex, endIndex);
 
     return (
         <div>
+            <Input.Search
+                placeholder="搜索书籍"
+                onSearch={handleSearchChange}
+                style={{ marginBottom: 16, width: 300 }}
+                enterButton
+            />
+
             <Row gutter={[16, 16]}>
                 {displayedBooks.map((book, index) => (
                     <Col span={4} key={book.id}>
@@ -22,7 +36,6 @@ export default function BooksExhibition() {
                 ))}
             </Row>
 
-            {/* 分页器 */}
             <Pagination
                 current={currentPage}
                 pageSize={pageSize}

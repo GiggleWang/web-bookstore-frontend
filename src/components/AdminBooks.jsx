@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Input, InputNumber } from 'antd';
 import axios from 'axios';
 import api from '../service/axios';
-
-const fetchBooks = async () => {
+const fetchBooks = async (searchQuery = '') => {
     try {
-        const response = await api.get(`${process.env.REACT_APP_API_URL}/api/admin/books`);
+        const response = await api.get(`${process.env.REACT_APP_API_URL}/api/admin/books`, {
+            params: { name: searchQuery }  // 假设后端接受名为 'name' 的查询参数来过滤书名
+        });
         return response.data;
     } catch (error) {
         console.error('Error fetching books:', error);
@@ -47,13 +48,13 @@ const AdminBooks = () => {
     const [editingBook, setEditingBook] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
-
+    const [searchQuery, setSearchQuery] = useState('');
     const [form] = Form.useForm();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const data = await fetchBooks();
+                const data = await fetchBooks(searchQuery);
                 setBooks(data);
                 setLoading(false);
             } catch (error) {
@@ -63,7 +64,7 @@ const AdminBooks = () => {
         };
 
         fetchData();
-    }, []);
+    }, [searchQuery]);
 
     const showEditModal = (book) => {
         setEditingBook(book);
@@ -167,9 +168,16 @@ const AdminBooks = () => {
             ),
         },
     ];
-
+    const handleSearch = (value) => {
+        setSearchQuery(value);  // 设置搜索关键字并触发 useEffect
+    };
     return (
         <div>
+            <Input.Search
+                placeholder="搜索书名"
+                onSearch={handleSearch}
+                style={{ marginBottom: 16, width: 300 }}
+            />
             <Table columns={columns} dataSource={books} rowKey="id" loading={loading} />
             <Button type="primary" onClick={showAddModal} style={{ marginTop: 16 }}>添加新书籍</Button>
             <Modal

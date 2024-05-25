@@ -5,7 +5,7 @@ import OrdersExhibition from "../components/OrdersExhibition";
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState([]);
-
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
     const initOrders = async () => {
         let orders = await getOrders();
         console.log("Orders before set state:", orders);  // 状态更新前打印
@@ -19,6 +19,14 @@ export default function OrdersPage() {
     }, []);
 
     return (
+        isAdmin?(
+            <>
+                <h1>所有用户订单</h1>
+                <Card className="card-container">
+                    <OrdersExhibition orderList={orders}></OrdersExhibition>
+                </Card>
+            </>
+            ):
         <Card className="card-container">
             <OrdersExhibition orderList={orders}></OrdersExhibition>
         </Card>
