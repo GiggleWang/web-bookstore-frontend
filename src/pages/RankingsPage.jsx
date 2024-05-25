@@ -1,10 +1,13 @@
 import React from 'react';
+import AdminRankings from "../components/AdminRankings";
 
-const RankingsPage = () => (
-    <div>
-        <h1>排行</h1>
-        <p>查看最热商品排行榜。</p>
-    </div>
-);
-
-export default RankingsPage;
+export default function RankingsPage(){
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    return(
+        isAdmin?(
+            <AdminRankings/>
+        ):(
+            <h1>rankingspage</h1>
+        )
+    )
+}
