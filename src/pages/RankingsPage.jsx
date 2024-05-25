@@ -1,5 +1,6 @@
 import React from 'react';
 import AdminRankings from "../components/AdminRankings";
+import UserRanking from "../components/UserRanking";
 
 export default function RankingsPage(){
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
@@ -7,7 +8,7 @@ export default function RankingsPage(){
         isAdmin?(
             <AdminRankings/>
         ):(
-            <h1>rankingspage</h1>
+            <UserRanking/>
         )
     )
 }

@@ -18,7 +18,7 @@ const items = [
     {key: '1', label: (<Link to="/home">首页</Link>)},
     {key: '2', label: (<Link to="/cart">购物车</Link>)},
     {key: '3', label: (<Link to="/orders">订单</Link>)},
-    {key: '4', label: (<Link to="/rankings">排行</Link>)},
+    {key: '4', label: (<Link to="/rankings">统计</Link>)},
     {key: '5', label: (<Link to="/user">用户</Link>)},
 ];
 
