@@ -1,7 +1,6 @@
 
 import api from "./axios";
-
-export async function getOrders() {
+export async function getOrders(filterParams = {}) {
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
     let url;
@@ -9,6 +8,12 @@ export async function getOrders() {
         url = `${process.env.REACT_APP_API_URL}/api/admin/order`;
     } else {
         url = `${process.env.REACT_APP_API_URL}/api/order`;
+    }
+
+    // Add filter parameters to the URL
+    const queryString = new URLSearchParams(filterParams).toString();
+    if (queryString) {
+        url += `?${queryString}`;
     }
 
     console.log(`Full API URL: ${url}`);
@@ -22,6 +27,7 @@ export async function getOrders() {
         return [];
     }
 }
+
 
 export function getTime(time) {
     let date = new Date(time);
