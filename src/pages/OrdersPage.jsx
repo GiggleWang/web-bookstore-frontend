@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { getOrders } from "../service/orders";
-import { Card, Input, Button, DatePicker } from "antd";
+import {useEffect, useState} from "react";
+import {getOrders} from "../service/orders";
+import {Card, Input, Button, DatePicker} from "antd";
 import OrdersExhibition from "../components/OrdersExhibition";
 
-const { RangePicker } = DatePicker;
+const {RangePicker} = DatePicker;
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState([]);
@@ -38,16 +38,16 @@ export default function OrdersPage() {
         isAdmin ? (
             <>
                 <h1>所有用户订单</h1>
-                <div style={{ marginBottom: '16px' }}>
+                <div style={{marginBottom: '16px'}}>
                     <Input
                         placeholder="搜索书籍名称"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ width: '200px', marginRight: '8px' }}
+                        style={{width: '200px', marginRight: '8px'}}
                     />
                     <RangePicker
                         onChange={(dates) => setDateRange(dates)}
-                        style={{ marginRight: '8px' }}
+                        style={{marginRight: '8px'}}
                     />
                     <Button type="primary" onClick={handleSearch}>搜索</Button>
                 </div>
@@ -55,10 +55,26 @@ export default function OrdersPage() {
                     <OrdersExhibition orderList={orders}></OrdersExhibition>
                 </Card>
             </>
+
         ) : (
-            <Card className="card-container">
-                <OrdersExhibition orderList={orders}></OrdersExhibition>
-            </Card>
+            <>
+                <div style={{marginBottom: '16px'}}>
+                    <Input
+                        placeholder="搜索书籍名称"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{width: '200px', marginRight: '8px'}}
+                    />
+                    <RangePicker
+                        onChange={(dates) => setDateRange(dates)}
+                        style={{marginRight: '8px'}}
+                    />
+                    <Button type="primary" onClick={handleSearch}>搜索</Button>
+                </div>
+                <Card className="card-container">
+                    <OrdersExhibition orderList={orders}></OrdersExhibition>
+                </Card>
+            </>
         )
     )
 }
