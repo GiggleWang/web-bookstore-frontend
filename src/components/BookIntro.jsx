@@ -51,7 +51,11 @@ export default function BookIntro(props) {
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        message.error('提交订单失败');
+                        if (error.response && error.response.data) {
+                            message.error(`提交订单失败: ${error.response.data}`);
+                        } else {
+                            message.error('提交订单失败');
+                        }
                     });
             })
             .catch(info => {
