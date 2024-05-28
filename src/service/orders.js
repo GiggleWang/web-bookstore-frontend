@@ -10,21 +10,27 @@ export async function getOrders(filterParams = {}) {
         url = `${process.env.REACT_APP_API_URL}/api/order`;
     }
 
-    // Add filter parameters to the URL
-    const queryString = new URLSearchParams(filterParams).toString();
-    if (queryString) {
-        url += `?${queryString}`;
-    }
+    // 将分页参数正确设置并添加到查询字符串中
+    const params = {
+        ...filterParams
+    };
+    const queryString = new URLSearchParams(params).toString();
+    url += `?${queryString}`;
 
     console.log(`Full API URL: ${url}`);
 
     try {
         const response = await api.get(url);
         console.log("Orders received:", response.data);
-        return response.data;
+        return {
+            orders: response.data.orders,
+            totalItems: response.data.totalItems,
+            totalPages: response.data.totalPages,  // 也可以获取总页数
+            currentPage: response.data.currentPage // 获取当前页，以保持前后端同步
+        };
     } catch (error) {
         console.error('Error fetching orders:', error);
-        return [];
+        return { orders: [], totalItems: 0, totalPages: 0, currentPage: 1 };
     }
 }
 
