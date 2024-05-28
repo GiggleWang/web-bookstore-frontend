@@ -5,19 +5,14 @@ import useBooks from "../service/books";
 
 export default function BooksExhibition() {
     const [searchQuery, setSearchQuery] = useState('');
-    const { books: booksDatabase, loading, error } = useBooks(searchQuery);
-    const pageSize = 12;
     const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 12;
+    const { books: booksDatabase, total, loading, error } = useBooks(searchQuery, currentPage, pageSize);
 
     const handleSearchChange = (value) => {
         setSearchQuery(value);
-        setCurrentPage(1); // 重置到第一页
+        setCurrentPage(1); // Reset to first page
     };
-
-
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const displayedBooks = booksDatabase.slice(startIndex, endIndex);
 
     return (
         <div>
@@ -29,7 +24,7 @@ export default function BooksExhibition() {
             />
 
             <Row gutter={[16, 16]}>
-                {displayedBooks.map((book, index) => (
+                {booksDatabase.map((book) => (
                     <Col span={4} key={book.id}>
                         <BookCard book={book} />
                     </Col>
@@ -39,7 +34,7 @@ export default function BooksExhibition() {
             <Pagination
                 current={currentPage}
                 pageSize={pageSize}
-                total={booksDatabase.length}
+                total={total} // 使用从后端获取的总数
                 onChange={page => setCurrentPage(page)}
             />
         </div>

@@ -3,10 +3,10 @@ import { Table, Button, Modal, Form, Input, InputNumber } from 'antd';
 import axios from 'axios';
 import api from '../service/axios';
 
-const fetchBooks = async (searchQuery = '') => {
+const fetchBooks = async (searchQuery = '', page = 0, size = 10) => {
     try {
         const response = await api.get(`${process.env.REACT_APP_API_URL}/api/admin/books`, {
-            params: { name: searchQuery }  // 假设后端接受名为 'name' 的查询参数来过滤书名
+            params: { name: searchQuery, page, size }
         });
         return response.data;
     } catch (error) {
@@ -14,7 +14,6 @@ const fetchBooks = async (searchQuery = '') => {
         throw error;
     }
 };
-
 const updateBook = async (bookId, updatedBook) => {
     try {
         await api.put(`${process.env.REACT_APP_API_URL}/api/admin/books/${bookId}`, updatedBook);
@@ -53,6 +52,7 @@ const toggleBookStatus = async (bookId, newStatus) => {
     }
 };
 
+
 const AdminBooks = () => {
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -60,13 +60,17 @@ const AdminBooks = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
     const [form] = Form.useForm();
+    const pageSize = 10;
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const data = await fetchBooks(searchQuery);
-                setBooks(data);
+                const data = await fetchBooks(searchQuery, currentPage - 1, pageSize);
+                setBooks(data.books);
+                setTotalItems(data.totalItems);
                 setLoading(false);
             } catch (error) {
                 console.error(error);
@@ -75,7 +79,7 @@ const AdminBooks = () => {
         };
 
         fetchData();
-    }, [searchQuery]);
+    }, [searchQuery, currentPage]);
 
     const showEditModal = (book) => {
         setEditingBook(book);
@@ -183,8 +187,13 @@ const AdminBooks = () => {
     ];
 
     const handleSearch = (value) => {
-        setSearchQuery(value);  // 设置搜索关键字并触发 useEffect
+        setSearchQuery(value);
     };
+
+    const handleTableChange = (pagination) => {
+        setCurrentPage(pagination.current);
+    };
+
     return (
         <div>
             <Input.Search
@@ -192,7 +201,14 @@ const AdminBooks = () => {
                 onSearch={handleSearch}
                 style={{ marginBottom: 16, width: 300 }}
             />
-            <Table columns={columns} dataSource={books} rowKey="id" loading={loading} />
+            <Table
+                columns={columns}
+                dataSource={books}
+                rowKey="id"
+                loading={loading}
+                pagination={{ current: currentPage, pageSize, total: totalItems }}
+                onChange={handleTableChange}
+            />
             <Button type="primary" onClick={showAddModal} style={{ marginTop: 16 }}>添加新书籍</Button>
             <Modal
                 title="修改书籍"

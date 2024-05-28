@@ -15,19 +15,24 @@ export async function getBookById(bookId) {
         return undefined; // 如果发生错误或找不到书籍，返回undefined
     }
 }
-
-const useBooks = (searchQuery = '') => {
+const useBooks = (searchQuery = '', page = 1, pageSize = 12) => {
     const [books, setBooks] = useState([]);
+    const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const params = searchQuery ? { params: { name: searchQuery } } : {};
+                const params = {
+                    name: searchQuery,
+                    page: page - 1, // 后端分页从0开始
+                    size: pageSize,
+                };
                 const url = `${process.env.REACT_APP_API_URL}/api/books`;
-                const { data } = await api.get(url, params);
-                setBooks(data);
+                const { data } = await api.get(url, { params });
+                setBooks(data.books); // 假设返回的数据结构为 { books: [], currentPage: 1, totalItems: 100, totalPages: 10 }
+                setTotal(data.totalItems);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching books:', error);
@@ -37,9 +42,9 @@ const useBooks = (searchQuery = '') => {
         };
 
         fetchData();
-    }, [searchQuery]);
+    }, [searchQuery, page, pageSize]);
 
-    return { books, loading, error };
+    return { books, total, loading, error };
 };
 
 export default useBooks;
