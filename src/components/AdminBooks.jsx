@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Input, InputNumber } from 'antd';
 import axios from 'axios';
 import api from '../service/axios';
+
 const fetchBooks = async (searchQuery = '') => {
     try {
         const response = await api.get(`${process.env.REACT_APP_API_URL}/api/admin/books`, {
@@ -38,6 +39,16 @@ const addBook = async (newBook) => {
         return response.data;
     } catch (error) {
         console.error('Error adding book:', error);
+        throw error;
+    }
+};
+
+const toggleBookStatus = async (bookId, newStatus) => {
+    try {
+        const response = await api.put(`${process.env.REACT_APP_API_URL}/api/admin/books/${bookId}/status`, { active: newStatus });
+        return response.data;
+    } catch (error) {
+        console.error('Error toggling book status:', error);
         throw error;
     }
 };
@@ -100,12 +111,12 @@ const AdminBooks = () => {
         }
     };
 
-    const handleDelete = async (bookId) => {
+    const handleToggleBookStatus = async (book) => {
         try {
-            await deleteBook(bookId);
-            setBooks(books.filter(book => book.id !== bookId));
+            const updatedBook = await toggleBookStatus(book.id, !book.active);
+            setBooks(books.map(b => (b.id === book.id ? updatedBook : b)));
         } catch (error) {
-            console.error(error);
+            console.error('Error toggling book status:', error);
         }
     };
 
@@ -163,11 +174,14 @@ const AdminBooks = () => {
             render: (text, record) => (
                 <span>
                     <Button onClick={() => showEditModal(record)}>修改</Button>
-                    <Button onClick={() => handleDelete(record.id)} style={{ marginLeft: 8 }}>删除</Button>
+                    <Button onClick={() => handleToggleBookStatus(record)} style={{ marginLeft: 8 }}>
+                        {record.active ? '下架' : '上架'}
+                    </Button>
                 </span>
             ),
         },
     ];
+
     const handleSearch = (value) => {
         setSearchQuery(value);  // 设置搜索关键字并触发 useEffect
     };

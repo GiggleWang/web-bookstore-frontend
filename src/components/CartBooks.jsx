@@ -1,7 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Table } from "antd";
+import { Table, Button, message, Typography } from "antd";
 import { Link } from "react-router-dom";
 import { getCartItems } from "../service/cart";
+import api from "../service/axios";
+
+const { Text } = Typography;
+
+const deleteCartItem = async (id) => {
+    try {
+        await api.delete(`${process.env.REACT_APP_API_URL}/api/cart/${id}`);
+    } catch (error) {
+        console.error('Error deleting cart item:', error);
+        throw error;
+    }
+};
 
 const CartBooks = ({ onSelectedItemsChange }) => {
     const [cartData, setCartData] = useState([]);
@@ -30,9 +42,22 @@ const CartBooks = ({ onSelectedItemsChange }) => {
         onSelectedItemsChange(selectedItems);
     };
 
+    const handleDelete = async (id) => {
+        try {
+            await deleteCartItem(id);
+            setCartData(cartData.filter(item => item.id !== id));
+            message.success('删除成功');
+        } catch (error) {
+            message.error('删除失败');
+        }
+    };
+
     const rowSelection = {
         selectedRowKeys,
         onChange: handleSelectChange,
+        getCheckboxProps: (record) => ({
+            disabled: !record.book.active, // 如果active为false则禁用复选框
+        }),
     };
 
     const columns = [
@@ -53,6 +78,22 @@ const CartBooks = ({ onSelectedItemsChange }) => {
             dataIndex: 'book',
             key: 'book_price',
             render: book => `${(book.price / 100).toFixed(2)} 元`
+        },
+        {
+            title: '状态',
+            key: 'status',
+            render: (text, record) => (
+                !record.book.active
+                    ? <Text type="danger">已经下架不能再购买</Text>
+                    : null
+            ),
+        },
+        {
+            title: '操作',
+            key: 'action',
+            render: (text, record) => (
+                <Button onClick={() => handleDelete(record.id)}>删除</Button>
+            ),
         },
     ];
 

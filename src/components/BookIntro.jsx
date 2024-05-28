@@ -123,10 +123,14 @@ export default function BookIntro(props) {
                                 <InputNumber min={1} defaultValue={1} onChange={setQuantity} />
                             </div>
 
-                            <Space>
-                                <Button size="large" onClick={() => onAddCartItem(currentBook.id, quantity)}>加入购物车</Button>
-                                <Button onClick={showModal} type="primary" size="large">立即购买</Button>
-                            </Space>
+                            {currentBook.active ? (
+                                <Space>
+                                    <Button size="large" onClick={() => onAddCartItem(currentBook.id, quantity)}>加入购物车</Button>
+                                    <Button onClick={showModal} type="primary" size="large">立即购买</Button>
+                                </Space>
+                            ) : (
+                                <Paragraph type="danger">该书籍已下架，无法购买</Paragraph>
+                            )}
                         </Space>
                     </Typography>
                 </Col>

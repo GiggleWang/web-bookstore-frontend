@@ -33,8 +33,8 @@ const ShoppingCartPage = () => {
                     address: address,
                     receiver: receiver,
                     items: selectedItems.map(item => ({
-                        bookId: item.bookId,
-                        quantity: item.quantity
+                        bookId: item.book.id,
+                        quantity: item.number
                     }))
                 };
 
@@ -84,7 +84,7 @@ const ShoppingCartPage = () => {
 
     useEffect(() => {
         console.log("Selected items after update:", selectedItems);
-        const total = selectedItems.reduce((acc, item) => acc + item.price, 0) / 100;
+        const total = selectedItems.reduce((acc, item) => acc + item.book.price * item.number, 0) / 100;
         setTotalPrice(total.toFixed(2));
     }, [selectedItems]);
 
