@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Input, Button, DatePicker, Card, Table, Pagination } from "antd";
+import {Input, Button, DatePicker, Card, Table, Pagination, List, Avatar} from "antd";
 import { getOrders } from "../service/orders";
 import { getTime } from "../service/orders";
 
@@ -15,21 +15,32 @@ function OrdersExhibition() {
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
     useEffect(() => {
-        const filters = {
+        let filters = {
             bookName: searchTerm,
-            startDate: dateRange[0] ? dateRange[0].format('YYYY-MM-DD') : undefined,
-            endDate: dateRange[1] ? dateRange[1].format('YYYY-MM-DD') : undefined
+            startDate: undefined,
+            endDate: undefined
         };
+
+        if (dateRange.length === 2) {
+            filters.startDate = dateRange[0] ? dateRange[0].format('YYYY-MM-DD') : undefined;
+            filters.endDate = dateRange[1] ? dateRange[1].format('YYYY-MM-DD') : undefined;
+        }
+
         fetchOrders(filters);
     }, [searchTerm, dateRange, currentPage]);
 
+
+
     const fetchOrders = async (filters) => {
         const params = {
-            page: currentPage - 1, // Page index starts from 0 in the backend
+            page: currentPage - 1, // 页面索引在后端从0开始
             size: pageSize,
-            ...filters
+            bookName: filters.bookName || '',  // 如果没有书名，显式发送 null
+            startDate: filters.startDate || '', // 如果没有开始日期，显式发送 null
+            endDate: filters.endDate || '', // 如果没有结束日期，显式发送 null
         };
         try {
+            console.log("startdate"+filters.startDate);
             const response = await getOrders(params);
             setOrders(response.orders);
             setTotalItems(response.totalItems);
@@ -38,6 +49,7 @@ function OrdersExhibition() {
             // Optionally handle errors in UI
         }
     };
+
 
     const handleSearch = (value) => {
         setSearchTerm(value);
@@ -66,16 +78,34 @@ function OrdersExhibition() {
                     style={{ width: '200px', marginRight: '8px' }}
                 />
                 <RangePicker
-                    onChange={dates => setDateRange(dates)}
+                    onChange={dates => setDateRange(dates || [])}  // 确保dateRange不会是null
                     style={{ marginRight: '8px' }}
                 />
+
                 <Button type="primary" onClick={() => handleSearch(searchTerm)}>搜索</Button>
             </div>
             <Table
                 columns={tableColumns}
+                expandable={{
+                    expandedRowRender: record => (
+                        <List
+                            dataSource={record.items} // 假设每个订单记录中都有一个 items 属性
+                            renderItem={item => (
+                                <List.Item>
+                                    <List.Item.Meta
+                                        avatar={<Avatar shape="square" size={80} src={item.book.cover} />}
+                                        title={item.book.name}
+                                        description={`数量：${item.quantity}`}
+                                    />
+                                </List.Item>
+                            )}
+                        />
+                    )
+                }}
                 dataSource={orders.map(order => ({ ...order, key: order.id }))}
-                pagination={false} // Disable internal pagination
+                pagination={false}
             />
+
             <Pagination
                 current={currentPage}
                 pageSize={pageSize}

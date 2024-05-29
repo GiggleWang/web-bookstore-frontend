@@ -3,6 +3,7 @@ import { getBookById } from "../service/books";
 import { Row, Col, Image, Typography, Divider, Space, Button, InputNumber, Form, Input, Modal, message } from 'antd';
 import { onAddCartItem } from "../service/cart";
 import api from "../service/axios";
+import {useNavigate} from "react-router-dom";
 
 const { Title, Paragraph } = Typography;
 
@@ -14,7 +15,7 @@ export default function BookIntro(props) {
     const [quantity, setQuantity] = useState(1); // 默认数量为1
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [form] = Form.useForm();
-
+    const navigate = useNavigate();
     const showModal = () => {
         setIsModalVisible(true);
     };
@@ -45,6 +46,7 @@ export default function BookIntro(props) {
                             message.success('订单已成功提交');
                             form.resetFields();
                             setIsModalVisible(false);
+                            navigate('/orders');
                         } else {
                             throw new Error('提交订单失败');
                         }
@@ -99,6 +101,10 @@ export default function BookIntro(props) {
                                 {`作者：${currentBook.author}`}
                                 <Divider type="vertical" />
                                 {`销量：${currentBook.sales}`}
+                                <Divider type="vertical" />
+                                {`ISBN编号：${currentBook.isbn}`}
+                                <Divider type="vertical" />
+                                {`库存：${currentBook.leftNum}`}
                             </Paragraph>
                         </Space>
                         <Divider orientation="left">作品简介</Divider>
