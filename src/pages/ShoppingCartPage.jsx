@@ -4,6 +4,7 @@ import { Input, Row, Statistic, Button, message, Form } from 'antd';
 import api from "../service/axios";
 import { useNavigate } from 'react-router-dom';
 import { Modal } from 'antd';
+import ImageUploader from "../components/ImageUploader";
 
 const ShoppingCartPage = () => {
     const [selectedItems, setSelectedItems] = useState([]);
@@ -11,7 +12,7 @@ const ShoppingCartPage = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [form] = Form.useForm();
     const navigate = useNavigate();
-
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
     const handleSelectedItems = (items) => {
         setSelectedItems(items);
     };
@@ -112,7 +113,12 @@ const ShoppingCartPage = () => {
     };
 
     return (
-        <div>
+        isAdmin ? (
+            <>
+                <h1>当前是管理员页面，无法操作购物车功能</h1>
+            </>
+        ) : (
+            <div>
             <CartBooks onSelectedItemsChange={handleSelectedItems} />
             <Statistic title="Total Price" value={totalPrice} />
             <Row gutter={16} justify="space-evenly">
@@ -142,6 +148,7 @@ const ShoppingCartPage = () => {
                 </Form>
             </Modal>
         </div>
+        )
     );
 };
 

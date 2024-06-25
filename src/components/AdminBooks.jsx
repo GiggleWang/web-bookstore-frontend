@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, InputNumber } from 'antd';
+import { Table, Button, Modal, Form, Input, InputNumber, message } from 'antd';
 import axios from 'axios';
 import api from '../service/axios';
+import ImageUploader from "./ImageUploader";
 
 const fetchBooks = async (searchQuery = '', page = 0, size = 10) => {
     try {
@@ -14,6 +15,7 @@ const fetchBooks = async (searchQuery = '', page = 0, size = 10) => {
         throw error;
     }
 };
+
 const updateBook = async (bookId, updatedBook) => {
     try {
         await api.put(`${process.env.REACT_APP_API_URL}/api/admin/books/${bookId}`, updatedBook);
@@ -51,7 +53,6 @@ const toggleBookStatus = async (bookId, newStatus) => {
         throw error;
     }
 };
-
 
 const AdminBooks = () => {
     const [books, setBooks] = useState([]);
@@ -194,6 +195,10 @@ const AdminBooks = () => {
         setCurrentPage(pagination.current);
     };
 
+    const handleImageUpload = (imageUrl) => {
+        form.setFieldsValue({ cover: imageUrl });
+    };
+
     return (
         <div>
             <Input.Search
@@ -227,19 +232,19 @@ const AdminBooks = () => {
                         <Input />
                     </Form.Item>
                     <Form.Item name="price" label="价格" rules={[{ required: true, message: '请输入价格' }]}>
-                        <InputNumber min={0} />
+                        <InputNumber min={0} style={{ width: '100%' }} />
                     </Form.Item>
                     <Form.Item name="description" label="描述" rules={[{ required: true, message: '请输入描述' }]}>
                         <Input.TextArea />
                     </Form.Item>
-                    <Form.Item name="cover" label="封面URL" rules={[{ required: true, message: '请输入封面URL' }]}>
-                        <Input />
+                    <Form.Item name="cover" label="封面" rules={[{ required: true, message: '请上传封面图片' }]}>
+                        <ImageUploader onImageUpload={handleImageUpload} initialImageUrl={editingBook ? editingBook.cover : null} />
                     </Form.Item>
                     <Form.Item name="isbn" label="ISBN 编号" rules={[{ required: true, message: '请输入ISBN编号' }]}>
                         <Input />
                     </Form.Item>
                     <Form.Item name="leftNum" label="库存量" rules={[{ required: true, message: '请输入库存量' }]}>
-                        <InputNumber min={0} />
+                        <InputNumber min={0} style={{ width: '100%' }} />
                     </Form.Item>
                 </Form>
             </Modal>
@@ -257,19 +262,19 @@ const AdminBooks = () => {
                         <Input />
                     </Form.Item>
                     <Form.Item name="price" label="价格" rules={[{ required: true, message: '请输入价格' }]}>
-                        <InputNumber min={0} />
+                        <InputNumber min={0} style={{ width: '100%' }} />
                     </Form.Item>
                     <Form.Item name="description" label="描述" rules={[{ required: true, message: '请输入描述' }]}>
                         <Input.TextArea />
                     </Form.Item>
-                    <Form.Item name="cover" label="封面URL" rules={[{ required: true, message: '请输入封面URL' }]}>
-                        <Input />
+                    <Form.Item name="cover" label="封面" rules={[{ required: true, message: '请上传封面图片' }]}>
+                        <ImageUploader onImageUpload={handleImageUpload} />
                     </Form.Item>
                     <Form.Item name="isbn" label="ISBN 编号" rules={[{ required: true, message: '请输入ISBN编号' }]}>
                         <Input />
                     </Form.Item>
                     <Form.Item name="leftNum" label="库存量" rules={[{ required: true, message: '请输入库存量' }]}>
-                        <InputNumber min={0} />
+                        <InputNumber min={0} style={{ width: '100%' }} />
                     </Form.Item>
                 </Form>
             </Modal>
