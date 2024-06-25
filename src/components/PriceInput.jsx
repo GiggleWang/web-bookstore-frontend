@@ -47,7 +47,9 @@ const PriceInput = ({ value = {}, onChange }) => {
                     value={yuan}
                     onChange={onYuanChange}
                     placeholder="元"
+                    style={{ width: '70%' }} // 设置宽度为70%
                 />
+                元
             </Col>
             <Col span={12}>
                 <Input
@@ -56,9 +58,12 @@ const PriceInput = ({ value = {}, onChange }) => {
                     onChange={onFenChange}
                     placeholder="分"
                     max={99}
+                    style={{ width: '70%' }} // 设置宽度为70%
                 />
+                分
             </Col>
         </Row>
+
     );
 };
 
