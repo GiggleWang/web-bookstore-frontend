@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, InputNumber, message } from 'antd';
-import axios from 'axios';
+import React, {useState, useEffect} from 'react';
+import {Table, Button, Modal, Form, Input, InputNumber, message} from 'antd';
 import api from '../service/axios';
 import ImageUploader from "./ImageUploader";
+import PriceInput from "./PriceInput";
 
 const fetchBooks = async (searchQuery = '', page = 0, size = 10) => {
     try {
         const response = await api.get(`${process.env.REACT_APP_API_URL}/api/admin/books`, {
-            params: { name: searchQuery, page, size }
+            params: {name: searchQuery, page, size}
         });
         return response.data;
     } catch (error) {
@@ -46,7 +46,7 @@ const addBook = async (newBook) => {
 
 const toggleBookStatus = async (bookId, newStatus) => {
     try {
-        const response = await api.put(`${process.env.REACT_APP_API_URL}/api/admin/books/${bookId}/status`, { active: newStatus });
+        const response = await api.put(`${process.env.REACT_APP_API_URL}/api/admin/books/${bookId}/status`, {active: newStatus});
         return response.data;
     } catch (error) {
         console.error('Error toggling book status:', error);
@@ -84,7 +84,13 @@ const AdminBooks = () => {
 
     const showEditModal = (book) => {
         setEditingBook(book);
-        form.setFieldsValue(book);
+        form.setFieldsValue({
+            ...book,
+            price: {
+                yuan: Math.floor(book.price / 100),
+                fen: book.price % 100
+            }
+        });
         setIsModalVisible(true);
     };
 
@@ -96,8 +102,12 @@ const AdminBooks = () => {
     const handleEditOk = async () => {
         try {
             const updatedBook = await form.validateFields();
-            await updateBook(editingBook.id, updatedBook);
-            setBooks(books.map(book => (book.id === editingBook.id ? { ...book, ...updatedBook } : book)));
+            const priceInCents = (updatedBook.price.yuan * 100) + updatedBook.price.fen;
+            await updateBook(editingBook.id, {...updatedBook, price: priceInCents});
+            setBooks(books.map(book => (book.id === editingBook.id ? {
+                ...book, ...updatedBook,
+                price: priceInCents
+            } : book)));
             setIsModalVisible(false);
             setEditingBook(null);
         } catch (error) {
@@ -108,7 +118,8 @@ const AdminBooks = () => {
     const handleAddOk = async () => {
         try {
             const newBook = await form.validateFields();
-            const addedBook = await addBook(newBook);
+            const priceInCents = (newBook.price.yuan * 100) + newBook.price.fen;
+            const addedBook = await addBook({...newBook, price: priceInCents});
             setBooks([...books, addedBook]);
             setIsAddModalVisible(false);
         } catch (error) {
@@ -151,6 +162,7 @@ const AdminBooks = () => {
             title: '价格',
             dataIndex: 'price',
             key: 'price',
+            render: (price) => <span>{(price / 100).toFixed(2)}元</span>,
         },
         {
             title: '描述',
@@ -161,7 +173,7 @@ const AdminBooks = () => {
             title: '封面',
             dataIndex: 'cover',
             key: 'cover',
-            render: (text) => <img src={text} alt="cover" width="50" />,
+            render: (text) => <img src={text} alt="cover" width="50"/>,
         },
         {
             title: 'ISBN 编号',
@@ -179,7 +191,7 @@ const AdminBooks = () => {
             render: (text, record) => (
                 <span>
                     <Button onClick={() => showEditModal(record)}>修改</Button>
-                    <Button onClick={() => handleToggleBookStatus(record)} style={{ marginLeft: 8 }}>
+                    <Button onClick={() => handleToggleBookStatus(record)} style={{marginLeft: 8}}>
                         {record.active ? '下架' : '上架'}
                     </Button>
                 </span>
@@ -196,7 +208,7 @@ const AdminBooks = () => {
     };
 
     const handleImageUpload = (imageUrl) => {
-        form.setFieldsValue({ cover: imageUrl });
+        form.setFieldsValue({cover: imageUrl});
     };
 
     return (
@@ -204,17 +216,17 @@ const AdminBooks = () => {
             <Input.Search
                 placeholder="搜索书名"
                 onSearch={handleSearch}
-                style={{ marginBottom: 16, width: 300 }}
+                style={{marginBottom: 16, width: 300}}
             />
             <Table
                 columns={columns}
                 dataSource={books}
                 rowKey="id"
                 loading={loading}
-                pagination={{ current: currentPage, pageSize, total: totalItems }}
+                pagination={{current: currentPage, pageSize, total: totalItems}}
                 onChange={handleTableChange}
             />
-            <Button type="primary" onClick={showAddModal} style={{ marginTop: 16 }}>添加新书籍</Button>
+            <Button type="primary" onClick={showAddModal} style={{marginTop: 16}}>添加新书籍</Button>
             <Modal
                 title="修改书籍"
                 visible={isModalVisible}
@@ -223,28 +235,29 @@ const AdminBooks = () => {
             >
                 <Form form={form} layout="vertical">
                     <Form.Item name="id" label="ID">
-                        <Input disabled />
+                        <Input disabled/>
                     </Form.Item>
-                    <Form.Item name="name" label="书名" rules={[{ required: true, message: '请输入书名' }]}>
-                        <Input />
+                    <Form.Item name="name" label="书名" rules={[{required: true, message: '请输入书名'}]}>
+                        <Input/>
                     </Form.Item>
-                    <Form.Item name="author" label="作者" rules={[{ required: true, message: '请输入作者' }]}>
-                        <Input />
+                    <Form.Item name="author" label="作者" rules={[{required: true, message: '请输入作者'}]}>
+                        <Input/>
                     </Form.Item>
-                    <Form.Item name="price" label="价格" rules={[{ required: true, message: '请输入价格' }]}>
-                        <InputNumber min={0} style={{ width: '100%' }} />
+                    <Form.Item name="price" label="价格" rules={[{required: true, message: '请输入价格'}]}>
+                        <PriceInput/>
                     </Form.Item>
-                    <Form.Item name="description" label="描述" rules={[{ required: true, message: '请输入描述' }]}>
-                        <Input.TextArea />
+                    <Form.Item name="description" label="描述" rules={[{required: true, message: '请输入描述'}]}>
+                        <Input.TextArea/>
                     </Form.Item>
-                    <Form.Item name="cover" label="封面" rules={[{ required: true, message: '请上传封面图片' }]}>
-                        <ImageUploader onImageUpload={handleImageUpload} initialImageUrl={editingBook ? editingBook.cover : null} />
+                    <Form.Item name="cover" label="封面" rules={[{required: true, message: '请上传封面图片'}]}>
+                        <ImageUploader onImageUpload={handleImageUpload}
+                                       initialImageUrl={editingBook ? editingBook.cover : null}/>
                     </Form.Item>
-                    <Form.Item name="isbn" label="ISBN 编号" rules={[{ required: true, message: '请输入ISBN编号' }]}>
-                        <Input />
+                    <Form.Item name="isbn" label="ISBN 编号" rules={[{required: true, message: '请输入ISBN编号'}]}>
+                        <Input/>
                     </Form.Item>
-                    <Form.Item name="leftNum" label="库存量" rules={[{ required: true, message: '请输入库存量' }]}>
-                        <InputNumber min={0} style={{ width: '100%' }} />
+                    <Form.Item name="leftNum" label="库存量" rules={[{required: true, message: '请输入库存量'}]}>
+                        <InputNumber min={0} style={{width: '100%'}}/>
                     </Form.Item>
                 </Form>
             </Modal>
@@ -255,26 +268,26 @@ const AdminBooks = () => {
                 onCancel={handleCancel}
             >
                 <Form form={form} layout="vertical">
-                    <Form.Item name="name" label="书名" rules={[{ required: true, message: '请输入书名' }]}>
-                        <Input />
+                    <Form.Item name="name" label="书名" rules={[{required: true, message: '请输入书名'}]}>
+                        <Input/>
                     </Form.Item>
-                    <Form.Item name="author" label="作者" rules={[{ required: true, message: '请输入作者' }]}>
-                        <Input />
+                    <Form.Item name="author" label="作者" rules={[{required: true, message: '请输入作者'}]}>
+                        <Input/>
                     </Form.Item>
-                    <Form.Item name="price" label="价格" rules={[{ required: true, message: '请输入价格' }]}>
-                        <InputNumber min={0} style={{ width: '100%' }} />
+                    <Form.Item name="price" label="价格" rules={[{required: true, message: '请输入价格'}]}>
+                        <PriceInput/>
                     </Form.Item>
-                    <Form.Item name="description" label="描述" rules={[{ required: true, message: '请输入描述' }]}>
-                        <Input.TextArea />
+                    <Form.Item name="description" label="描述" rules={[{required: true, message: '请输入描述'}]}>
+                        <Input.TextArea/>
                     </Form.Item>
-                    <Form.Item name="cover" label="封面" rules={[{ required: true, message: '请上传封面图片' }]}>
-                        <ImageUploader onImageUpload={handleImageUpload} />
+                    <Form.Item name="cover" label="封面" rules={[{required: true, message: '请上传封面图片'}]}>
+                        <ImageUploader onImageUpload={handleImageUpload}/>
                     </Form.Item>
-                    <Form.Item name="isbn" label="ISBN 编号" rules={[{ required: true, message: '请输入ISBN编号' }]}>
-                        <Input />
+                    <Form.Item name="isbn" label="ISBN 编号" rules={[{required: true, message: '请输入ISBN编号'}]}>
+                        <Input/>
                     </Form.Item>
-                    <Form.Item name="leftNum" label="库存量" rules={[{ required: true, message: '请输入库存量' }]}>
-                        <InputNumber min={0} style={{ width: '100%' }} />
+                    <Form.Item name="leftNum" label="库存量" rules={[{required: true, message: '请输入库存量'}]}>
+                        <InputNumber min={0} style={{width: '100%'}}/>
                     </Form.Item>
                 </Form>
             </Modal>
