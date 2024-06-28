@@ -52,8 +52,8 @@ function OrdersExhibition() {
 
 
     const handleSearch = (value) => {
+        setCurrentPage(1);
         setSearchTerm(value);
-        setCurrentPage(1); // Reset to first page
     };
 
     const tableColumns = [

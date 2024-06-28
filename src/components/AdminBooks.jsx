@@ -9,6 +9,7 @@ const fetchBooks = async (searchQuery = '', page = 0, size = 10) => {
         const response = await api.get(`${process.env.REACT_APP_API_URL}/api/admin/books`, {
             params: {name: searchQuery, page, size}
         });
+        console.log(response.data);
         return response.data;
     } catch (error) {
         console.error('Error fetching books:', error);
@@ -200,6 +201,7 @@ const AdminBooks = () => {
     ];
 
     const handleSearch = (value) => {
+        setCurrentPage(1);
         setSearchQuery(value);
     };
 
